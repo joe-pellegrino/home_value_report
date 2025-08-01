@@ -21,7 +21,6 @@ llm = ChatOpenAI(
     model="gpt-4o",
     temperature=0.0,
     max_retries=3,
-    #max_tokens=1000,
     streaming=True
 )
 
@@ -55,7 +54,6 @@ def get_comps(input:str)->str:
     writer = get_stream_writer()
     writer("Fetching competitors in the market...\n")
     conn = http.client.HTTPSConnection("zillow-com1.p.rapidapi.com")
-    #conn.debuglevel = 1  # Enable debug output for HTTP requests
 
     headers = {
         'x-rapidapi-key': "",
@@ -66,22 +64,14 @@ def get_comps(input:str)->str:
     request_url = f"/propertyComps?address={address}"
 
     conn.request("GET", request_url, headers=headers)
-    
-    #print(f"Requesting comps for address: {address}")
-    #print(f"Request: {conn}")
 
     res = conn.getresponse()
     data = res.read()
     
-    #print(f"Response status: {res.status}")
-    #print(f"Response data: {data}")    
-
     response = llm.invoke("You are a real estate expert. You MUST respond in HTML format that looks highly professional. Analyze the following data and provide a summary of the competitors in the market.\n\n" + data.decode('utf-8'))
     pdf_response = pdf_generator(response.content)
     print("PDF Generation Response:", pdf_response)
 
-    #print("-----------------------")
-    #print(f"LLM Response: {response}")
     return response
 
 tools = [get_comps, pdf_generator]
@@ -104,13 +94,8 @@ system_prompt = """
 
 while True:
     user_input = input("You: ")
-     
-
-    config = {"configurable": {"thread_id": "abc123"}}
     
-    # serialized_history = serialize_messages(conversation_history)
-
-
+    config = {"configurable": {"thread_id": "abc123"}}
     for chunk in agent_executor.stream(
         {
             "messages": 
